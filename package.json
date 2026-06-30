@@ -1,0 +1,13 @@
+{
+  "name": "link-saver",
+  "version": "1.0.0",
+  "description": "Tiny link saver: paste a URL, auto-fetch its title, persist, list, delete, favourite.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
