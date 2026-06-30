@@ -49,6 +49,18 @@ app.post('/links', async (req, res) => {
   res.status(201).json(link);
 });
 
+// PATCH /links/:id - toggle the favourite flag on one link.
+app.patch('/links/:id', (req, res) => {
+  const links = readLinks();
+  const link = links.find((l) => String(l.id) === req.params.id);
+  if (!link) {
+    return res.status(404).json({ error: 'Link not found.' });
+  }
+  link.favourite = !link.favourite;
+  writeLinks(links);
+  res.json(link);
+});
+
 // DELETE /links/:id - remove one link by id. Keep everyone whose id does
 // NOT match; compare as strings since the route param is always a string.
 app.delete('/links/:id', (req, res) => {
