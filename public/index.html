@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Saver</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.4rem; }
+    form { display: flex; gap: .5rem; margin-bottom: .5rem; }
+    input[type=url] { flex: 1; padding: .5rem; }
+    button { padding: .5rem .75rem; cursor: pointer; }
+    #error { color: #c00; min-height: 1.2rem; margin-bottom: 1rem; }
+    ul { list-style: none; padding: 0; }
+    li { border: 1px solid #ddd; border-radius: 6px; padding: .75rem; margin-bottom: .5rem; }
+    .title { font-weight: 600; }
+    .url { color: #06c; word-break: break-all; font-size: .85rem; }
+    .meta { color: #888; font-size: .8rem; margin-top: .25rem; }
+    .del { float: right; color: #c00; background: none; border: none; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Link Saver</h1>
+  <form id="form">
+    <input type="url" id="url" placeholder="https://example.com" required />
+    <button type="submit">Save</button>
+  </form>
+  <div id="error"></div>
+  <ul id="list"></ul>
+
+  <script>
+    const form = document.getElementById('form');
+    const urlInput = document.getElementById('url');
+    const errorBox = document.getElementById('error');
+    const list = document.getElementById('list');
+
+    async function load() {
+      const links = await fetch('/links').then((r) => r.json());
+      render(links);
+    }
+
+    function render(links) {
+      list.innerHTML = '';
+      for (const l of links) {
+        const li = document.createElement('li');
+        const when = new Date(l.savedAt).toLocaleString();
+        li.innerHTML =
+          '<button class="del" title="Delete">×</button>' +
+          '<div class="title"></div>' +
+          '<a class="url" target="_blank" rel="noopener"></a>' +
+          '<div class="meta">Saved ' + when + '</div>';
+        li.querySelector('.title').textContent = l.title;
+        const a = li.querySelector('.url');
+        a.textContent = l.url;
+        a.href = l.url;
+        li.querySelector('.del').onclick = () => remove(l.id);
+        list.appendChild(li);
+      }
+    }
+
+    async function remove(id) {
+      await fetch('/links/' + id, { method: 'DELETE' });
+      load();
+    }
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      errorBox.textContent = '';
+      const res = await fetch('/links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlInput.value }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: 'Something went wrong.' }));
+        errorBox.textContent = error || 'Could not save link.';
+        return;
+      }
+      urlInput.value = '';
+      load();
+    };
+
+    load();
+  </script>
+</body>
+</html>

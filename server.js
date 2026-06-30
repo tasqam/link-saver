@@ -3,6 +3,7 @@ const { readLinks, writeLinks } = require('./storage');
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'));
 
 // Pull the <title> out of an HTML string. Case-insensitive, spans newlines.
 // No <title> -> null, and the caller falls back to the URL.
