@@ -48,4 +48,16 @@ app.post('/links', async (req, res) => {
   res.status(201).json(link);
 });
 
+// DELETE /links/:id - remove one link by id. Keep everyone whose id does
+// NOT match; compare as strings since the route param is always a string.
+app.delete('/links/:id', (req, res) => {
+  const links = readLinks();
+  const remaining = links.filter((l) => String(l.id) !== req.params.id);
+  if (remaining.length === links.length) {
+    return res.status(404).json({ error: 'Link not found.' });
+  }
+  writeLinks(remaining);
+  res.sendStatus(204);
+});
+
 app.listen(3000, () => console.log('Link saver running on http://localhost:3000'));
